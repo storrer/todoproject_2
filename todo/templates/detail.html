@@ -4,3 +4,19 @@
     <input type="submit" name="save" value="Save" />
     <input type="submit" name="delete" value="Delete" />
 </form>
+
+<h2>Comments:</h2>
+<ul>
+    {% for comment in comments %}
+        <li>{{ comment.comment }}</li>
+    {% endfor %}
+</ul>
+
+<form action="{% url 'task' id %}" method="POST">
+    {% csrf_token %}
+    {{ comment_form}}
+    <input type="submit" name="create_comment" value="Add Comment" />
+</form>
+
+{% comment %} Return to main Todo List page {% endcomment %}
+<a href="{% url 'todo_list' %}">Back to Todo List</a>

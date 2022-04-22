@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 
 from django.views import View
 
-from todo.forms import TaskForm
-from todo.models import Task
+from todo.forms import CommentForm, TaskForm
+from todo.models import Comment, Task
 
 # Create your views here.
 
@@ -32,12 +32,14 @@ class TodoDetailView(View):
     def get(self, request, task_id):
         '''GET the detail view of a single task on the todo list'''
         task = Task.objects.get(id=task_id)
+        comments = Comment.objects.filter(task=task_id)
         task_form = TaskForm(instance=task)
+        comment_form = CommentForm()
 
         return render(
             request=request,
             template_name='detail.html',
-            context={'task_form': task_form, 'id': task_id}
+            context={'task_form': task_form,'comment_form':comment_form,'comments':comments, 'id': task_id}
         )
 
     def post(self, request, task_id):
@@ -50,6 +52,14 @@ class TodoDetailView(View):
 
         elif 'delete' in request.POST:
             task.delete()
+        elif 'create_comment' in request.POST:
+            comment_form = CommentForm(request.POST)
+            # Create a new comment and associate it with the task
+            comment_text = comment_form['comment'].data
+            # Update the database with the new comment
+            Comment.objects.create(comment=comment_text, task=task)
+            return redirect(f'/todo/{task_id}')
+            
 
         # "redirect" to the todo homepage
         return redirect('todo_list')
